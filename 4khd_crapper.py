@@ -20,7 +20,7 @@ def img_crapper(url, folder_name):
     
     #得到图集页数
     selector = 'body > div > div > main > div.is-layout-flex.wp-container-36.wp-block-columns > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > div.page-link-box > ul > li> a'
-    page_num = 1 + len(BeautifulSoup(response.text,'html.parser').select(selector = selector))
+    page_num = 1 + len(BeautifulSoup(response.text, 'html.parser').select(selector = selector))
 
     #文件会下载在你运行程序所在的目录下
     #创建文件夹(日期文件夹(年月日),图集文件夹)
@@ -56,7 +56,7 @@ def img_crapper(url, folder_name):
 
         #数据解析
         selector = 'body > div > div > main > div > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > figure > a'
-        figure_list = BeautifulSoup(response.text,'html.parser').select(selector = selector)
+        figure_list = BeautifulSoup(response.text, 'html.parser').select(selector = selector)
         for item in figure_list:
             img_name = str(i) + '.jpg'
             i += 1
@@ -69,8 +69,8 @@ def img_crapper(url, folder_name):
                 img_data = get_img_data(figure)
             except:
                 #记录连接超时的链接
-                timeout_data = open('timeout_img_url.txt', 'a')
-                timeout_data.write(figure + '\n')
+                timeout_data = open('timeout_url.txt', 'a')
+                timeout_data.write(url + '\n')
                 timeout_data.close()
                 continue
 
@@ -119,7 +119,7 @@ def page_crapper(page_url):
         return 1
 
     #得到该页所有图集的链接
-    soup=BeautifulSoup(strhtml.text,'html.parser')
+    soup=BeautifulSoup(strhtml.text, 'html.parser')
     # 爬取主页的selector
     selector = 'body > div > div > div > div.is-layout-flow.wp-block-query > ul > li > div > div.is-layout-flow.wp-block-group.is-style-no-margin > figure > a'
     # 爬取cosplay的selector
@@ -151,15 +151,15 @@ def timeout_url_crapper():
         for url in timeout_url:
             url = url.rstrip('\n')
             img_crapper(url, get_folder_name(url))
-    if os.path.exists('./timeout_img_url.txt'):
-        f = open('./timeout_img_url.txt', 'r+')
-        timeout_url = f.readlines()
-        f.truncate(0)
-        f.close()
-        for url in timeout_url:
-            url = url.rstrip('\n')
-            print('正在爬取图片' + page_url)
-            img_crapper(url, get_folder_name(url))
+    empty_txt_delete()
+
+#删除空的timeout_url文件
+def empty_txt_delete():
+    txt_list = ['./timeout_page_url.txt', './timeout_url.txt', './timeout_img_url.txt']
+    for txt_name in txt_list:
+        if os.path.exists(txt_name):
+            if not os.path.getsize(txt_name):
+                os.remove(txt_name)
 
 ### 开始主程序 ###
 
@@ -192,10 +192,3 @@ print('所有网页爬取完成！')
 #再次尝试之前tiomeout的page和url的爬取
 print('尝试连接超时网页的再爬取')
 timeout_url_crapper()
-
-#删除空的timeout_url文件
-txt_list = ['./timeout_page_url.txt', './timeout_url.txt', './timeout_img_url.txt']
-for txt_name in txt_list:
-    if os.path.exists(txt_name):
-        if not os.path.getsize(txt_name):
-            os.remove(txt_name)
