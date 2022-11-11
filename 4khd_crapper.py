@@ -20,7 +20,10 @@ def img_crapper(url, folder_name):
     
     #得到图集页数
     selector = 'body > div > div > main > div.is-layout-flex.wp-container-36.wp-block-columns > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > div.page-link-box > ul > li> a'
-    page_num = 1 + len(BeautifulSoup(response.text, 'html.parser').select(selector = selector))
+    try:
+        page_num = 1 + len(BeautifulSoup(response.text, 'lxml').select(selector = selector))
+    except:
+        page_num = 1 + len(BeautifulSoup(response.text, 'html.parser').select(selector = selector))
 
     #文件会下载在你运行程序所在的目录下
     #创建文件夹(日期文件夹(年月日),图集文件夹)
@@ -56,7 +59,10 @@ def img_crapper(url, folder_name):
 
         #数据解析
         selector = 'body > div > div > main > div > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > figure > a'
-        figure_list = BeautifulSoup(response.text, 'html.parser').select(selector = selector)
+        try:
+            figure_list = BeautifulSoup(response.text, 'lxml').select(selector = selector)
+        except:
+            figure_list = BeautifulSoup(response.text, 'html.parser').select(selector = selector)
         for item in figure_list:
             img_name = str(i) + '.jpg'
             i += 1
@@ -119,7 +125,10 @@ def page_crapper(page_url):
         return 1
 
     #得到该页所有图集的链接
-    soup=BeautifulSoup(strhtml.text, 'html.parser')
+    try:
+        soup = BeautifulSoup(strhtml.text, 'lxml')
+    except:
+        soup = BeautifulSoup(strhtml.text, 'html.parser')
     # 爬取主页的selector
     selector = 'body > div > div > div > div.is-layout-flow.wp-block-query > ul > li > div > div.is-layout-flow.wp-block-group.is-style-no-margin > figure > a'
     # 爬取cosplay的selector
