@@ -177,9 +177,9 @@ def read_yml_all(yml_path):
 def set_config_defaul():
     config_data_str = """\
 #图片保存的路径，（默认为.\，即与运行文件同一路径）
-save_path : .\\
+save_path: .\\
 #是否请求图片保存路径的修改（true为是，默认为true）
-save_path_request : true
+save_path_request: true
 """
     config_data = yaml.load(config_data_str)
     f = open('./config.yml', 'a', encoding = 'utf-8')
