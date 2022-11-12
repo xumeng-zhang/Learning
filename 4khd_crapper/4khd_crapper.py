@@ -182,7 +182,7 @@ request_save_path: true
 request_page_choice: true
 """
     config_data = yaml.load(config_data_str)
-    f = open('./config.yml', 'a', encoding = 'utf-8')
+    f = open('./config.yml', 'w', encoding = 'utf-8')
     yaml.dump(config_data, f)
     f.close()
 
