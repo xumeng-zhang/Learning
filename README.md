@@ -53,8 +53,8 @@ pip install -r requirements.txt
 `config.yml`的默认设置为：
 
 ```
-save_path: .\
-save_path_request: true
+save_path : .\
+save_path_request : true
 ```
 
 在运行一次`4khd_crapper.py`后，`config.yml`中的`save_path_request`设置会变为`false`
