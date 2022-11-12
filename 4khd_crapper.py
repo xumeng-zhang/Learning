@@ -177,9 +177,9 @@ def read_yml_all(yml_path):
 def set_config_defaul():
     config_data_str = """\
 #图片保存的路径，（默认为.\，即与运行文件同一路径）
-save_path: D:\Desktop\img_crapper
+save_path: .\\
 #是否请求图片保存路径的修改（True为是，默认不请求）
-save_path_request : False
+save_path_request : True
 """
     config_data = yaml.load(config_data_str)
     f = open('./config.yml', 'a', encoding = 'utf-8')
@@ -201,7 +201,8 @@ except:
     set_config_defaul()
     config_data = read_yml_all('./config.yml')
 
-#查询是否要请求修改图片保存路径，默认为否
+#查询是否要请求修改图片保存路径，默认为是
+#询问一次之后，之后就不再询问（可以到config.yml将save_path_request改为True来开启询问）
 try:
     save_path = config_data['save_path']
     save_path_request = config_data['save_path_request']
@@ -211,13 +212,14 @@ except:
     save_path = config_data['save_path']
     save_path_request = config_data['save_path_request']
 if save_path_request:
+    config_data['save_path_request'] = False
     print('请输入图片要保存到的路径（空着即保存到该运行文件所在的路径）')
     save_path = input()
     if save_path != '':
-        config_data = read_yml_all('./config.yml')
         config_data['save_path'] = save_path
-        f = open('./config.yml', 'w', encoding = 'utf-8')
-        yaml.dump(config_data, f)
+    f = open('./config.yml', 'w', encoding = 'utf-8')
+    yaml.dump(config_data, f)
+    save_path = config_data['save_path']
 save_path += '/'
 
 #先对已储存的tiomeout的page和url的爬取
