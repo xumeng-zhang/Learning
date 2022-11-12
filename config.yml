@@ -1,0 +1,4 @@
+#图片保存的路径，（默认为.\，即与运行文件同一路径）
+save_path: D:\Desktop\img_crapper2
+#是否请求图片保存路径的修改（True为是，默认不请求）
+save_path_request: false
