@@ -44,17 +44,32 @@ pip install -r requirements.txt
 
 在开始爬取时和完成所有图集的爬取后，会尝试一次对记录的超时链接爬取的重试，并记录依然连接超时的链接
 
-#### 图片保存的路径设置
+#### 配置文件
 
-第一次运行文件是，会询问图片保存的路径，输入为空则默认选择运行文件所在的路径作为图片保存的路径
-
-输入图片保存的路径后，会在运行文件所在的路径生成名为`config.yml`的配置文件
+第一次运行文件，会生成名为`config.yml`的配置文件
 
 `config.yml`的默认设置为：
 
-```
+```yaml
 save_path: .\
-save_path_request: true
+page_choice: main
+request_save_path: false
+request_page_choice: false
 ```
 
-在运行一次`4khd_crapper.py`后，`config.yml`中的`save_path_request`设置会变为`false`
+##### 图片保存的路径设置
+
+第一次运行文件会询问图片保存的路径，输入为空则默认选择运行文件所在的路径作为图片保存的路径
+
+之后`config.yml`中`request_save_path`的设置会变为`false`，以后运行文件不再询问图片保存的路径
+
+若想开启询问，可以在`config.yml`中将`request_save_path`的设置改为`true`
+
+##### 爬取界面的选择设置
+
+第一次运行文件会询问爬取界面的选择，选项为`main`（主页）、`cosplay`、`album`，输入为空则默认选择`main`
+
+之后`config.yml`中`request_page_choice`的设置会变为`false`，以后运行文件不再询问爬取界面的选择
+
+若想开启询问，可以在`config.yml`中将`request_page_choice`的设置改为`true`
+
