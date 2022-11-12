@@ -188,6 +188,7 @@ save_path_request : true
 
 ### 开始主程序 ###
 
+#请求头伪装
 if __name__ == '__main__':
         headers = {
             'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
@@ -201,7 +202,7 @@ except:
     set_config_defaul()
     config_data = read_yml_all('./config.yml')
 #查询是否要请求修改图片保存路径，默认为是
-#询问一次之后，之后就不再询问（可以到config.yml将save_path_request改为True来开启询问）
+#询问一次之后，之后就不再询问（可以到config.yml将save_path_request改为true来再开启一次询问）
 try:
     save_path = config_data['save_path']
     save_path_request = config_data['save_path_request']
@@ -212,7 +213,7 @@ except:
     save_path_request = config_data['save_path_request']
 if save_path_request:
     config_data['save_path_request'] = False
-    print('请输入图片要保存到的路径（空着即保存到该运行文件所在的路径）')
+    print('请输入图片要保存到的路径（空着为保存到该运行文件所在的路径）')
     save_path = input()
     if save_path != '':
         config_data['save_path'] = save_path
