@@ -16,13 +16,19 @@ https://www.bilibili.com/video/BV1iu411C79S
 
 ### 4khd_single_url_crapper.py
 
-4khd_single_url_crapper.py的运行需要非官方库有requests, lxml
+`4khd_single_url_crapper.py`的运行需要非官方库有requests, lxml
 
 需要手动输入url和folder_name来进行爬取，图片保存在与运行文件同路径的名为folder_name的文件夹中
 
 ### 4khd_crapper.py
 
-4khd_crapper.py的运行需要的非官方库有requests, bs4, retrying
+#### 运行依赖的库
+
+`requirements.txt`记录运行需要的库，可通过`pip`功能安装：
+
+```
+pip install -r requirements.txt
+```
 
 #### 爬取功能介绍
 
@@ -34,6 +40,21 @@ https://www.bilibili.com/video/BV1iu411C79S
 
 #### 连接超时的链接重爬取功能
 
-如果有连接超时的链接，链接会被记录在运行文件同路径下的txt文件中，分别记录在timeout_page_url.txt（记录连接超时的页链接）和timeout_url.txt（记录连接超时的图连接）
+如果有连接超时的链接，链接会被记录在运行文件同路径下的txt文件中，分别记录在`timeout_page_url.txt`（记录连接超时的页链接）和`timeout_url.txt`（记录连接超时的图连接）
 
 在开始爬取时和完成所有图集的爬取后，会尝试一次对记录的超时链接爬取的重试，并记录依然连接超时的链接
+
+#### 图片保存的路径设置
+
+第一次运行文件是，会询问图片保存的路径，输入为空则默认选择运行文件所在的路径作为图片保存的路径
+
+输入图片保存的路径后，会在运行文件所在的路径生成名为`config.yml`的配置文件
+
+`config.yml`的默认设置为：
+
+```
+save_path: .\
+save_path_request: true
+```
+
+在运行一次`4khd_crapper.py`后，`config.yml`中的`save_path_request`设置会变为`false`
