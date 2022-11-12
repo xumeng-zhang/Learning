@@ -177,9 +177,9 @@ def read_yml_all(yml_path):
 def set_config_defaul():
     config_data_str = """\
 #图片保存的路径，（默认为.\，即与运行文件同一路径）
-save_path: .\\
-#是否请求图片保存路径的修改（True为是，默认不请求）
-save_path_request : True
+save_path : .\\
+#是否请求图片保存路径的修改（true为是，默认为true）
+save_path_request : true
 """
     config_data = yaml.load(config_data_str)
     f = open('./config.yml', 'a', encoding = 'utf-8')
@@ -200,7 +200,6 @@ try:
 except:
     set_config_defaul()
     config_data = read_yml_all('./config.yml')
-
 #查询是否要请求修改图片保存路径，默认为是
 #询问一次之后，之后就不再询问（可以到config.yml将save_path_request改为True来开启询问）
 try:
