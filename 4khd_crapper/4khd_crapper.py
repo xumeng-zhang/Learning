@@ -9,9 +9,10 @@ from retrying import retry
 import ruamel.yaml
 
 #爬取图片
-def img_crapper(url, folder_name):
+def img_crapper(url):
     #此处的url存放想要下载图片的网址
     #folder_name是下载的文件夹名字
+    folder_name = get_folder_name(url)
     try:
         response = get_url_response(url)
     except:
@@ -19,7 +20,8 @@ def img_crapper(url, folder_name):
         timeout_data.write(url + '\n')
         timeout_data.close()
         return
-    
+    downloading_progress_write('url', url)
+
     #得到图集页数
     try:
         page_num = 1 + len(BeautifulSoup(response.text, 'lxml').select(selector = url_selector))
@@ -45,7 +47,7 @@ def img_crapper(url, folder_name):
     if not os.path.exists(path):
         os.mkdir(path)
     
-    
+    #开始爬取图片
     i = 1
     for n in range(page_num):
         extra_str = '/' + str(n + 1) if n else ''
@@ -126,8 +128,18 @@ def page_crapper(page_url):
         return 0
     for item in data:
         url = (item.get('href'))
-        img_crapper(url, get_folder_name(url))
+        img_crapper(url)
     return 1
+
+#记录下载进度（下载的主界面链接page_url和图集链接url）
+def downloading_progress_write(type, item):
+    if type == 'page':
+        config_data['downloading_progress_page'] = int(item)
+    elif type == 'url':
+        config_data['downloading_progress_url'] = item
+    f = open('./config.yml', 'w', encoding = 'utf-8')
+    yaml.dump(config_data, f)
+    f.close()
 
 #超时链接的重爬取
 def timeout_url_crapper():
@@ -147,7 +159,7 @@ def timeout_url_crapper():
         f.close()
         for url in timeout_url:
             url = url.rstrip('\n')
-            img_crapper(url, get_folder_name(url))
+            img_crapper(url)
     empty_txt_delete()
 
 #删除空的timeout_url文件
@@ -180,6 +192,12 @@ page_choice: main
 request_save_path: true
 #是否请求爬取界面的选择（true为是，默认为true）
 request_page_choice: true
+
+#记录爬取进度
+#爬取的界面页数，默认为1，即第一页
+downloading_progress_page: 1
+#爬取的图集链接，默认为none，即没有正在爬取的图集
+downloading_progress_url: none
 """
     config_data = yaml.load(config_data_str)
     f = open('./config.yml', 'w', encoding = 'utf-8')
@@ -209,7 +227,10 @@ selector_dict = {
         'cosplay': 'body > div > div > main > div.is-layout-constrained.entry-content.wp-block-post-content > div.is-layout-constrained.wp-container-62.wp-block-group.is-style-no-margin > div > ul > li > div > div.is-layout-flow.wp-block-group.is-style-no-margin > figure > a',
         'album': 'body > div > div > main > div.is-layout-constrained.entry-content.wp-block-post-content > div.is-layout-constrained.wp-container-62.wp-block-group.is-style-no-margin > div > ul > li > div > div.is-layout-flow.wp-block-group.is-style-no-margin > figure > a'
     },
-    'url_selector': 'body > div > div > main > div.is-layout-flex.wp-container-36.wp-block-columns > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > div.page-link-box > ul > li> a',
+    #the old url_selector isn't the best though it's usable
+    # 'url_selector': 'body > div > div > main > div.is-layout-flex.wp-container-36.wp-block-columns > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > div.page-link-box > ul > li> a',
+    #new url_selector
+    'url_selector': 'body > div > div > main > div > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > div.page-link-box > ul > li> a',
     'img_selector': 'body > div > div > main > div > div > div > div:nth-child(1) > div.is-layout-flow.wp-block-group.is-style-default > div > figure > figure > a'
 }
 
@@ -234,6 +255,7 @@ try:
     request_save_path = config_data['request_save_path']
     request_page_choice = config_data['request_page_choice']
 except:
+    print('config.yml数据错误，已重置文件')
     set_config_default()
     config_data = read_yml_all('./config.yml')
     save_path = config_data['save_path']
@@ -266,10 +288,12 @@ if request_page_choice:
         page_choice = input()
     if page_choice == '':
         page_choice = 'main'
-    config_data['page_choice'] = page_choice
-    f = open('./config.yml', 'w', encoding = 'utf-8')
-    yaml.dump(config_data, f)
-    f.close()
+    if config_data['page_choice'] != page_choice:
+        config_data['page_choice'] = page_choice
+        config_data['downloading_progress_page'] = 1  #改变爬取界面的设定，将从第一页开始爬取
+        f = open('./config.yml', 'w', encoding = 'utf-8')
+        yaml.dump(config_data, f)
+        f.close()
 if page_choice == 'main':
     origin_url = page_dict[page_choice]['choice1']
 else:
@@ -283,24 +307,51 @@ img_selector = selector_dict['img_selector']
 
 ## 爬取程序 ##
 
+#载入爬取进度
+print('正在载入爬取进度...')
+try:
+    downloading_progress_page = config_data['downloading_progress_page']
+    downloading_progress_url = config_data['downloading_progress_url']
+except:
+    print('config.yml数据错误，已重置文件')
+    set_config_default()
+    config_data = read_yml_all('/config.yml')
+    downloading_progress_page = config_data['downloading_progress_page']
+    downloading_progress_url = config_data['downloading_progress_url']
+print('载入完成！')
+#对之前没有爬取完的图集完成爬取
+print('对之前没有爬取完的图集完成爬取')
+if downloading_progress_url != 'none':
+    img_crapper(downloading_progress_url)
+    config_data['downloading_progress_url'] = 'none'
+    f = open('./config.yml', 'w', encoding = 'utf-8')
+    yaml.dump(config_data, f)
+    f.close()
+
 #先对已储存的tiomeout的page和url的爬取
 print('对已记录的超时网页进行再爬取')
 timeout_url_crapper()
+print('再爬取完成！')
 
 #爬取最近更新的内容，因为有时origin_url里的内容不一定是最新的
 #只会在爬取主页的时候运行
 if page_choice == 'main':
-    print('正在爬取网页https://www.4khd.com/')
+    print('正在爬取最新内容')
     page_crapper('https://www.4khd.com/')
+    print('最新内容爬取完成！')
 
 #爬取page_choice界面下所有页的网页
-i = 1
+#页数载入到还未爬取的页码
+i = downloading_progress_page
 print('正在爬取网页' + origin_url + str(i))
+downloading_progress_write('page', i)
 while page_crapper(origin_url + str(i)) != 0: #判断是否到最后一页
     i += 1
     print('正在爬取网页' + origin_url + str(i))
+    downloading_progress_write('page', i)
 print('所有网页爬取完成！')
 
 #再次尝试之前tiomeout的page和url的爬取
-print('尝试连接超时网页的再爬取')
+print('尝试对连接超时网页的再爬取')
 timeout_url_crapper()
+print('再爬取完成！')
