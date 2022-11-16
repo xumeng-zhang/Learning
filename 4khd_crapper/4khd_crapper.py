@@ -175,6 +175,7 @@ def read_yml_all(yml_path):
     try:
         f = open(yml_path, 'r', encoding = 'utf-8')
         yml_config = yaml.load(f)
+        f.close()
         return yml_config
     except:
         return None
@@ -297,7 +298,7 @@ if request_page_choice:
     if config_data['page_choice'] != page_choice:
         config_data['page_choice'] = page_choice
         config_data['downloading_progress_page'] = 1  #改变爬取界面的设定，将从第一页开始爬取
-        config_data['downloading_success'] = False #改变爬取为未完成
+        config_data['download_success'] = False #改变爬取为未完成
         save_config()
 if page_choice == 'main':
     origin_url = page_dict[page_choice]['choice1']
@@ -317,23 +318,24 @@ print('正在载入爬取进度...')
 try:
     downloading_progress_page = config_data['downloading_progress_page']
     downloading_progress_url = config_data['downloading_progress_url']
-    downloading_success = config_data['downloading_success']
+    download_success = config_data['download_success']
 except:
     print('config.yml数据错误，已重置文件')
     set_config_default()
-    config_data = read_yml_all('/config.yml')
+    config_data = read_yml_all('./config.yml')
     downloading_progress_page = config_data['downloading_progress_page']
     downloading_progress_url = config_data['downloading_progress_url']
-    downloading_success = config_data['downloading_success']
+    download_success = config_data['download_success']
 print('载入完成！')
 #如果已经爬取完成，则询问是否重新开始一轮爬取
-if downloading_success:
+if download_success:
     print('爬取已经完成，是否开始新一轮爬取？[y/n]')
     crapper_request = input()
     if crapper_request == 'y':
-        config_data['downloading_success'] = True
+        config_data['download_success'] = False
         config_data['downloading_progress_page'] = 1
-        config_data['downloading_progress_page'] = 'none'
+        config_data['downloading_progress_url'] = 'none'
+        download_success = False
         downloading_progress_page = 1
         downloading_progress_url = 'none'
         save_config()
@@ -358,15 +360,16 @@ if page_choice == 'main':
 
 #爬取page_choice界面下所有页的网页
 #页数载入到还未爬取的页码
-i = downloading_progress_page
-print('正在爬取网页' + origin_url + str(i))
-downloading_progress_write('page', i)
-while page_crapper(origin_url + str(i)) != 0: #判断是否到最后一页
-    i += 1
+if not download_success:
+    i = downloading_progress_page
     print('正在爬取网页' + origin_url + str(i))
     downloading_progress_write('page', i)
-config_data['downloading_success'] = True
-save_config()
+    while page_crapper(origin_url + str(i)) != 0: #判断是否到最后一页
+        i += 1
+        print('正在爬取网页' + origin_url + str(i))
+        downloading_progress_write('page', i)
+    config_data['download_success'] = True
+    save_config()
 print('所有网页爬取完成！')
 
 #再次尝试之前tiomeout的page和url的爬取
