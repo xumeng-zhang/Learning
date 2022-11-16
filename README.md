@@ -55,6 +55,9 @@ save_path: .\
 page_choice: main
 request_save_path: false
 request_page_choice: false
+downloading_progress_page: 1
+downloading_progress_url: none
+download_success: false
 ```
 
 ##### 图片保存的路径设置
@@ -73,3 +76,12 @@ request_page_choice: false
 
 若想开启询问，可以在`config.yml`中将`request_page_choice`的设置改为`true`
 
+##### 爬取进度保存
+
+`downloading_progress_page`记录爬取界面页码，默认为`1`，即第一页
+
+`downloading_progress_url`记录正在爬取的图集的链接，默认为`none`
+
+`download_success`记录是否全部爬取完成，默认为`false`，为没有完成爬取
+
+若全部爬取完成后再次运行文件，则会询问是否重新开始爬取
